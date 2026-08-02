@@ -1,0 +1,11 @@
+date,region,product,category,customer,revenue,profit,orders
+2026-01-05,North,Laptop,Electronics,ABC Corp,12000,2500,15
+2026-01-12,South,Phone,Electronics,XYZ Ltd,8000,1800,22
+2026-02-03,East,Chair,Furniture,HomePlus,3500,700,18
+2026-02-15,West,Desk,Furniture,OfficeHub,5400,1200,12
+2026-03-01,North,Monitor,Electronics,ABC Corp,6200,1400,16
+2026-03-18,South,Printer,Office,TechMart,4100,900,10
+2026-04-09,East,Keyboard,Accessories,RetailOne,1800,450,30
+2026-04-27,West,Mouse,Accessories,RetailOne,1500,380,34
+2026-05-11,North,Laptop,Electronics,Global Inc,15000,3200,19
+2026-05-29,South,Phone,Electronics,XYZ Ltd,9800,2200,27

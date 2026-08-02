@@ -1,0 +1,11 @@
+emp_id,name,department,designation,experience,salary,email,phone
+EMP001,Sumanth,CSE,Student,5 years,10LPA,sumanth@gmail.com,9032136337
+EMP002,Mukesh,CSE,Student,6 years,11LPA,124@gmail.com,9032136337
+EMP003,Sai,CSE,Student,7 years,12LPA,123@gmail.com,9032136337
+EMP004,Valli,CSE,Student,8 years,13LPA,125@gmail.com,9032136337
+EMP005,Liki,CSE,Student,9 years,14LPA,126@gmail.com,9032136337
+EMP006,Aunty,CSE,Student,10 years,15LPA,127@gmail.com,9032136337
+EMP007,bubli,CSE,Student,11 years,16LPA,128@gmail.com,9032136337
+EMP008,Cheki,CSE,Student,12 years,17LPA,129@gmail.com,9032136337
+EMP009,Sumanth,CSE,Student,13 years,18LPA,128@gmail.com,9032136337
+EMP010,Mukesh,CSE,Student,14 years,19LPA,12m@gmail.com,9032136337

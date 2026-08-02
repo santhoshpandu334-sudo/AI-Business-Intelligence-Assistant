@@ -1,0 +1,5 @@
+date,revenue,profit,region,category,customer_name
+2026-01-15,120000,45000,Bangalore,Software,Acme Corp
+2026-02-15,150000,55000,Hyderabad,Cloud,Global Tech
+2026-03-15,98000,32000,Bangalore,Hardware,Alpha Solutions
+2026-04-15,172000,68000,Hyderabad,SaaS,Omega Ventures

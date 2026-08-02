@@ -1,0 +1,226 @@
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.db.session import get_db
+from app.db.models import Conversation, ChatMessageModel, AISettings, User, Dataset
+from app.schemas.schemas import (
+    ConversationCreate, ConversationUpdate, ConversationResponse, 
+    ChatMessageResponse, AISettingsUpdate, AISettingsResponse, ChatMessage
+)
+from app.api.deps import get_current_user, require_roles
+from app.services.rag_service import RAGPipelineService
+
+router = APIRouter()
+
+@router.post("/conversations", response_model=ConversationResponse)
+def create_conversation(
+    conv_in: ConversationCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    conv = Conversation(
+        user_id=current_user.id,
+        dataset_id=conv_in.dataset_id,
+        title=conv_in.title or "New Business Intelligence Query",
+        model_provider=conv_in.model_provider or "llama3.1"
+    )
+    db.add(conv)
+    db.commit()
+    db.refresh(conv)
+
+    # Add welcome message
+    welcome_msg = ChatMessageModel(
+        conversation_id=conv.id,
+        sender="assistant",
+        message_text=f"Welcome! I am your AI Business Intelligence Assistant powered by LangChain, FAISS RAG, and `{conv.model_provider.upper()}`. Ask any natural language question regarding datasets, sales trends, regional ARR, or customer churn.",
+        sources_json=["RAG Vector Storage Active"],
+        data_summary_json={"Model Provider": conv.model_provider.upper(), "Status": "Ready for Query"},
+        confidence_score=99.0,
+        follow_ups_json=[
+            "Why did sales decrease in March?",
+            "Which region generated maximum revenue?",
+            "Compare Bangalore and Hyderabad ARR.",
+            "Which customer accounts exhibit churn risk?"
+        ]
+    )
+    db.add(welcome_msg)
+    db.commit()
+    db.refresh(conv)
+    return conv
+
+@router.get("/conversations", response_model=List[ConversationResponse])
+def list_conversations(
+    search: Optional[str] = None,
+    is_pinned: Optional[bool] = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Conversation).filter(Conversation.user_id == current_user.id)
+    if search:
+        query = query.filter(Conversation.title.ilike(f"%{search}%"))
+    if is_pinned is not None:
+        query = query.filter(Conversation.is_pinned == is_pinned)
+
+    conversations = query.order_by(Conversation.is_pinned.desc(), Conversation.updated_at.desc()).all()
+    if not conversations:
+        # Create default initial conversation
+        conv = Conversation(
+            user_id=current_user.id,
+            title="Enterprise Executive Briefing",
+            model_provider="llama3.1"
+        )
+        db.add(conv)
+        db.commit()
+        db.refresh(conv)
+
+        welcome_msg = ChatMessageModel(
+            conversation_id=conv.id,
+            sender="assistant",
+            message_text="Welcome! Ask me any question using your uploaded company datasets.",
+            sources_json=["RAG Vector Storage Active"],
+            data_summary_json={"Status": "Active"},
+            confidence_score=99.0
+        )
+        db.add(welcome_msg)
+        db.commit()
+        db.refresh(conv)
+        conversations = [conv]
+
+    return conversations
+
+@router.get("/conversations/{conversation_id}", response_model=ConversationResponse)
+def get_conversation_history(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Conversation).filter(Conversation.id == conversation_id)
+    if current_user.role != "Admin":
+        query = query.filter(Conversation.user_id == current_user.id)
+    conv = query.first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+
+    return conv
+
+@router.put("/conversations/{conversation_id}", response_model=ConversationResponse)
+def update_conversation(
+    conversation_id: int,
+    conv_in: ConversationUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Conversation).filter(Conversation.id == conversation_id)
+    if current_user.role != "Admin":
+        query = query.filter(Conversation.user_id == current_user.id)
+    conv = query.first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+
+
+    if conv_in.title is not None:
+        conv.title = conv_in.title
+    if conv_in.is_pinned is not None:
+        conv.is_pinned = conv_in.is_pinned
+    if conv_in.model_provider is not None:
+        conv.model_provider = conv_in.model_provider
+
+    db.commit()
+    db.refresh(conv)
+    return conv
+
+@router.delete("/conversations/{conversation_id}")
+def delete_conversation(
+    conversation_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_roles(["Admin", "Manager", "Analyst"]))
+):
+    query = db.query(Conversation).filter(Conversation.id == conversation_id)
+    if current_user.role != "Admin":
+        query = query.filter(Conversation.user_id == current_user.id)
+    conv = query.first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+
+
+    db.delete(conv)
+    db.commit()
+    return {"message": "Conversation successfully deleted."}
+
+@router.post("/conversations/{conversation_id}/messages", response_model=ChatMessageResponse)
+def send_rag_message(
+    conversation_id: int,
+    chat_in: ChatMessage,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Conversation).filter(Conversation.id == conversation_id)
+    if current_user.role != "Admin":
+        query = query.filter(Conversation.user_id == current_user.id)
+    conv = query.first()
+    if not conv:
+        raise HTTPException(status_code=404, detail="Conversation not found.")
+
+
+    dataset_id = chat_in.dataset_id or conv.dataset_id
+    if not dataset_id:
+        ds = db.query(Dataset).first()
+        if ds:
+            dataset_id = ds.id
+
+    assistant_response = RAGPipelineService.execute_rag_query(
+        db=db,
+        user_id=current_user.id,
+        conversation_id=conversation_id,
+        user_message=chat_in.message,
+        dataset_id=dataset_id,
+        model_provider=conv.model_provider
+    )
+    return assistant_response
+
+@router.get("/settings", response_model=AISettingsResponse)
+def get_ai_settings(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    settings_entry = db.query(AISettings).filter(AISettings.user_id == current_user.id).first()
+    if not settings_entry:
+        settings_entry = AISettings(
+            user_id=current_user.id,
+            preferred_llm="llama3.1",
+            temperature=0.2,
+            max_tokens=2048,
+            prompt_style="Executive Analytical",
+            language="en"
+        )
+        db.add(settings_entry)
+        db.commit()
+        db.refresh(settings_entry)
+    return settings_entry
+
+@router.put("/settings", response_model=AISettingsResponse)
+def update_ai_settings(
+    settings_in: AISettingsUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    settings_entry = db.query(AISettings).filter(AISettings.user_id == current_user.id).first()
+    if not settings_entry:
+        settings_entry = AISettings(user_id=current_user.id)
+        db.add(settings_entry)
+
+    if settings_in.preferred_llm:
+        settings_entry.preferred_llm = settings_in.preferred_llm
+    if settings_in.temperature is not None:
+        settings_entry.temperature = settings_in.temperature
+    if settings_in.max_tokens is not None:
+        settings_entry.max_tokens = settings_in.max_tokens
+    if settings_in.prompt_style:
+        settings_entry.prompt_style = settings_in.prompt_style
+    if settings_in.language:
+        settings_entry.language = settings_in.language
+
+    db.commit()
+    db.refresh(settings_entry)
+    return settings_entry
