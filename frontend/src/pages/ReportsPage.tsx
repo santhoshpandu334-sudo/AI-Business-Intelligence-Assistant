@@ -9,7 +9,7 @@ import { Report } from '../types';
 import { useDataset } from '../context/DatasetContext';
 
 export const ReportsPage: React.FC = () => {
-  const { datasets, selectedDatasetId } = useDataset();
+  const { uniqueDatasets, selectedDatasetId, loading: datasetsLoading } = useDataset();
   const [reports, setReports] = useState<Report[]>([]);
   const [title, setTitle] = useState('Q4 Executive Performance & Forecast Digest');
   const [format, setFormat] = useState<'pdf' | 'excel' | 'docx'>('pdf');

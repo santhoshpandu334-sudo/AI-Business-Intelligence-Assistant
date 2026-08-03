@@ -28,21 +28,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleQuickLogin = async (presetEmail: string) => {
-    setEmail(presetEmail);
-    setPassword('AdminPass2026!');
-    setLoading(true);
-    try {
-      await login(presetEmail, 'AdminPass2026!');
-      navigate('/dashboard');
-    } catch (err) {
-      // If user doesn't exist yet, trigger Google SSO demo login
-      await loginGoogle();
-      navigate('/dashboard');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 relative">
@@ -100,34 +85,16 @@ export const LoginPage: React.FC = () => {
           </Button>
         </form>
 
-        <div className="relative my-6 text-center">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-800"></div></div>
-          <span className="relative bg-slate-950 px-3 text-xs text-slate-500 font-mono">OR QUICK DEMO LOGIN</span>
-        </div>
-
-        <Button
-          variant="secondary"
-          className="w-full gap-2 text-xs"
-          onClick={() => loginGoogle().then(() => navigate('/dashboard'))}
-        >
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
-          Single Sign-On (Google Enterprise OAuth)
-        </Button>
-
-        {/* Quick Role Tester Bar */}
-        <div className="mt-6 pt-4 border-t border-slate-800/80 text-center">
-          <span className="text-[11px] text-slate-400 block mb-2 font-medium">Test Role Authorization Access:</span>
-          <div className="flex justify-center gap-2">
-            <button onClick={() => handleQuickLogin('enterprise.admin@acme.com')} className="px-2.5 py-1 rounded-lg bg-indigo-500/10 text-indigo-400 text-xs font-semibold border border-indigo-500/30 hover:bg-indigo-500/20">
-              Admin
-            </button>
-            <button onClick={() => handleQuickLogin('manager@acme.com')} className="px-2.5 py-1 rounded-lg bg-purple-500/10 text-purple-400 text-xs font-semibold border border-purple-500/30 hover:bg-purple-500/20">
-              Manager
-            </button>
-            <button onClick={() => handleQuickLogin('analyst@acme.com')} className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/30 hover:bg-emerald-500/20">
-              Analyst
-            </button>
-          </div>
+        <div className="my-6">
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full gap-2 text-xs"
+            onClick={() => loginGoogle().then(() => navigate('/dashboard'))}
+          >
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" className="w-4 h-4" alt="Google" />
+            Single Sign-On (Google Enterprise OAuth)
+          </Button>
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-6">

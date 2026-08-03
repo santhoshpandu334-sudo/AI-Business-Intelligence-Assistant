@@ -76,6 +76,24 @@ def list_datasets(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    # Seed default enterprise dataset if database is completely empty
+    if db.query(Dataset).count() == 0:
+        default_ds = DatasetService.process_and_save_upload(
+            db=db,
+            file_name="Enterprise_Sales_2026.csv",
+            content_bytes=(
+                b"date,revenue,profit,region,category,customer_name\n"
+                b"2026-01-15,120000,45000,Bangalore,Software,Acme Corp\n"
+                b"2026-02-15,150000,55000,Hyderabad,Cloud,Global Tech\n"
+                b"2026-03-15,98000,32000,Bangalore,Hardware,Alpha Solutions\n"
+                b"2026-04-15,172000,68000,Hyderabad,SaaS,Omega Ventures"
+            ),
+            owner_id=current_user.id,
+            company_name=current_user.company_name or "Acme Corp",
+            owner_name=current_user.full_name
+        )
+        InsightsEngineService.generate_all_insights(db, default_ds.id)
+
     query = db.query(Dataset)
 
     # Search filter
@@ -96,27 +114,7 @@ def list_datasets(
     else:
         query = query.order_by(Dataset.created_at.desc())
 
-    datasets = query.all()
-    if not datasets:
-        # Seed default enterprise dataset if none exist
-        default_ds = DatasetService.process_and_save_upload(
-            db=db,
-            file_name="Enterprise_Sales_2026.csv",
-            content_bytes=(
-                b"date,revenue,profit,region,category,customer_name\n"
-                b"2026-01-15,120000,45000,Bangalore,Software,Acme Corp\n"
-                b"2026-02-15,150000,55000,Hyderabad,Cloud,Global Tech\n"
-                b"2026-03-15,98000,32000,Bangalore,Hardware,Alpha Solutions\n"
-                b"2026-04-15,172000,68000,Hyderabad,SaaS,Omega Ventures"
-            ),
-            owner_id=current_user.id,
-            company_name=current_user.company_name or "Acme Corp",
-            owner_name=current_user.full_name
-        )
-        InsightsEngineService.generate_all_insights(db, default_ds.id)
-        datasets = [default_ds]
-
-    return datasets
+    return query.all()
 
 @router.get("/{dataset_id}", response_model=DatasetResponse)
 def get_dataset_by_id(

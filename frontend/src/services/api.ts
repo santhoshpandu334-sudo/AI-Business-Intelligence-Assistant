@@ -418,6 +418,18 @@ export const api = {
     return res.json();
   },
 
+  async deleteUser(userId: number): Promise<any> {
+    const res = await fetch(`${API_BASE}/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to delete user' }));
+      throw new Error(err.detail || 'Failed to delete user');
+    }
+    return res.json();
+  },
+
   async getNotifications(): Promise<NotificationItem[]> {
     const res = await fetch(`${API_BASE}/notifications/`, { headers: getHeaders() });
     if (!res.ok) return [];

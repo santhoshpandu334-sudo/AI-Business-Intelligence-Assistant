@@ -44,7 +44,7 @@ import { useDataset } from '../context/DatasetContext';
 
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { datasets, selectedDatasetId, setSelectedDatasetId, loading: datasetsLoading } = useDataset();
+  const { datasets, uniqueDatasets, selectedDatasetId, setSelectedDatasetId, loading: datasetsLoading } = useDataset();
   const [insights, setInsights] = useState<Insight[]>([]);
   
   // Dashboard Summary Data State
@@ -172,15 +172,21 @@ export const DashboardPage: React.FC = () => {
           <div className="flex items-center gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-300">
             <Database className="w-4 h-4 text-indigo-400" />
             <span className="font-semibold text-slate-400">Target Dataset:</span>
-            <select
-              value={selectedDatasetId || ''}
-              onChange={(e) => setSelectedDatasetId(Number(e.target.value))}
-              className="bg-slate-950 text-xs text-white focus:outline-none font-bold cursor-pointer"
-            >
-              {datasets.map((d) => (
-                <option key={d.id} value={d.id} className="bg-slate-950 text-white">{d.name}</option>
-              ))}
-            </select>
+            {datasetsLoading ? (
+              <span className="text-slate-400 font-mono animate-pulse">Loading datasets...</span>
+            ) : uniqueDatasets.length === 0 ? (
+              <span className="text-slate-500 font-bold">No datasets uploaded yet.</span>
+            ) : (
+              <select
+                value={selectedDatasetId || ''}
+                onChange={(e) => setSelectedDatasetId(Number(e.target.value))}
+                className="bg-slate-950 text-xs text-white focus:outline-none font-bold cursor-pointer"
+              >
+                {uniqueDatasets.map((d) => (
+                  <option key={d.id} value={d.id} className="bg-slate-950 text-white">{d.name}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => navigate('/upload')}>

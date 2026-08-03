@@ -17,7 +17,7 @@ import { useDataset } from '../context/DatasetContext';
 
 export const AIChatPage: React.FC = () => {
   const { hasRole } = useAuth();
-  const { datasets, selectedDatasetId, setSelectedDatasetId } = useDataset();
+  const { datasets, uniqueDatasets, selectedDatasetId, setSelectedDatasetId, loading: datasetsLoading } = useDataset();
   
   const [conversations, setConversations] = useState<ConversationItem[]>([]);
   const [activeConversation, setActiveConversation] = useState<ConversationItem | null>(null);
@@ -299,15 +299,21 @@ export const AIChatPage: React.FC = () => {
             {/* Dataset Target Selector */}
             <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-3 py-1 text-xs">
               <Database className="w-3.5 h-3.5 text-indigo-400" />
-              <select
-                value={selectedDatasetId || ''}
-                onChange={(e) => setSelectedDatasetId(Number(e.target.value))}
-                className="bg-transparent text-slate-200 focus:outline-none cursor-pointer"
-              >
-                {datasets.map((d) => (
-                  <option key={d.id} value={d.id}>{d.name}</option>
-                ))}
-              </select>
+              {datasetsLoading ? (
+                <span className="text-slate-400 font-mono animate-pulse">Loading...</span>
+              ) : uniqueDatasets.length === 0 ? (
+                <span className="text-slate-500 font-bold">No datasets</span>
+              ) : (
+                <select
+                  value={selectedDatasetId || ''}
+                  onChange={(e) => setSelectedDatasetId(Number(e.target.value))}
+                  className="bg-transparent text-slate-200 focus:outline-none cursor-pointer"
+                >
+                  {uniqueDatasets.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
 
             <Button size="sm" variant="ghost" onClick={exportChatHistory} className="p-2" title="Export Chat Transcript">

@@ -82,7 +82,7 @@ export const LandingPage: React.FC = () => {
               Launch Assistant <ArrowRight className="w-4 h-4" />
             </Button>
             <Button size="lg" variant="secondary" className="w-full sm:w-auto" onClick={() => navigate('/login')}>
-              Live Demo Login
+              Sign In
             </Button>
           </div>
         </motion.div>

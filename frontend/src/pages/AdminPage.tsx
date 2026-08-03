@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Users, ShieldCheck } from 'lucide-react';
+import { Users, ShieldCheck, Trash2, AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '../components/ui/GlassCard';
 import { Badge } from '../components/ui/Badge';
+import { Button } from '../components/ui/Button';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 import { User, AuditLogItem, AdminStats } from '../types';
 
 export const AdminPage: React.FC = () => {
+  const { user: currentUser } = useAuth();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
+
+  // Deletion and toast states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<number | null>(null);
+  const [toastMessage, setToastMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     api.getAdminStats().then(setStats).catch(console.error);
@@ -16,13 +26,45 @@ export const AdminPage: React.FC = () => {
     api.getAuditLogs().then(setAuditLogs).catch(console.error);
   }, []);
 
+  const showToast = (text: string, type: 'success' | 'error') => {
+    setToastMessage({ text, type });
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
   const handleRoleChange = async (userId: number, newRole: string) => {
     try {
       await api.updateRole(userId, newRole);
       const updated = await api.getAllUsers();
       setUsers(updated);
     } catch {
-      alert("Role update failed");
+      showToast("Role update failed", "error");
+    }
+  };
+
+  const canDeleteUser = (u: User) => {
+    if (u.id === currentUser?.id) return false;
+    if ((u.role as string) === 'Super Admin' || u.email?.toLowerCase().includes('superadmin')) return false;
+    return ['Manager', 'Analyst', 'Employee'].includes(u.role);
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    setDeletingUserId(userToDelete.id);
+    try {
+      await api.deleteUser(userToDelete.id);
+      showToast("User deleted successfully.", "success");
+      const updatedUsers = await api.getAllUsers();
+      setUsers(updatedUsers);
+      const updatedStats = await api.getAdminStats();
+      setStats(updatedStats);
+      const updatedLogs = await api.getAuditLogs();
+      setAuditLogs(updatedLogs);
+    } catch (err: any) {
+      showToast("Unable to delete user.", "error");
+    } finally {
+      setDeletingUserId(null);
+      setDeleteModalOpen(false);
+      setUserToDelete(null);
     }
   };
 
@@ -126,6 +168,7 @@ export const AdminPage: React.FC = () => {
                 <th className="p-3">Company</th>
                 <th className="p-3">Role</th>
                 <th className="p-3">Change Role</th>
+                <th className="p-3">Actions</th>
               </tr>
 
             </thead>
@@ -135,7 +178,7 @@ export const AdminPage: React.FC = () => {
               {users.length === 0 ? (
 
                 <tr>
-                  <td colSpan={4} className="text-center p-6 text-slate-400">
+                  <td colSpan={5} className="text-center p-6 text-slate-400">
                     No users found
                   </td>
                 </tr>
@@ -193,6 +236,28 @@ export const AdminPage: React.FC = () => {
                         <option className="bg-slate-900 text-slate-200">Employee</option>
                       </select>
 
+                    </td>
+
+                    <td className="p-3">
+                      <Button
+                        type="button"
+                        variant="danger"
+                        size="sm"
+                        disabled={!canDeleteUser(u) || deletingUserId === u.id}
+                        onClick={() => {
+                          setUserToDelete(u);
+                          setDeleteModalOpen(true);
+                        }}
+                        className="gap-1.5 px-2.5 py-1.5 text-xs border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 disabled:opacity-40 disabled:hover:bg-rose-500/10 disabled:cursor-not-allowed"
+                        title={!canDeleteUser(u) ? "Cannot delete this account." : "Delete User"}
+                      >
+                        {deletingUserId === u.id ? (
+                          <span className="w-3.5 h-3.5 border-2 border-rose-400 border-t-transparent rounded-full animate-spin"></span>
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
+                        Delete
+                      </Button>
                     </td>
 
                   </tr>
@@ -279,6 +344,46 @@ export const AdminPage: React.FC = () => {
         </div>
 
       </GlassCard>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModalOpen && userToDelete && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <GlassCard className="w-full max-w-md p-6 border border-rose-500/40 shadow-glow">
+            <h3 className="text-lg font-bold text-rose-400 mb-2 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-rose-400" /> Delete User?
+            </h3>
+            <div className="text-xs text-slate-300 space-y-3 mb-6">
+              <p>Are you sure you want to permanently delete this user?</p>
+              <div className="p-3 bg-slate-950/50 rounded-lg border border-slate-800 space-y-1">
+                <div><span className="text-slate-500">Name:</span> <span className="font-bold text-white font-mono">{userToDelete.full_name}</span></div>
+                <div><span className="text-slate-500">Email:</span> <span className="font-bold text-white font-mono">{userToDelete.email}</span></div>
+              </div>
+              <p className="text-rose-400/90 font-medium">This action cannot be undone.</p>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="ghost" onClick={() => { setDeleteModalOpen(false); setUserToDelete(null); }}>Cancel</Button>
+              <Button type="button" variant="danger" className="bg-rose-600 hover:bg-rose-700 text-white font-bold" onClick={handleDeleteUser}>Delete User</Button>
+            </div>
+          </GlassCard>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-glow border text-xs font-medium flex items-center gap-2 ${
+              toastMessage.type === 'success' ? 'bg-emerald-950/90 border-emerald-500/40 text-emerald-300' : 'bg-rose-950/90 border-rose-500/40 text-rose-300'
+            }`}
+          >
+            {toastMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+            {toastMessage.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

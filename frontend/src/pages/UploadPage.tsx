@@ -80,7 +80,13 @@ export const UploadPage: React.FC = () => {
   const loadDatasets = async () => {
     try {
       const list = await api.getDatasets(search, filterCompany, undefined, sortBy);
-      setDatasets(list);
+      const seen = new Set<number>();
+      const uniqueList = list.filter(d => {
+        if (seen.has(d.id)) return false;
+        seen.add(d.id);
+        return true;
+      });
+      setDatasets(uniqueList);
     } catch (err) {}
   };
 

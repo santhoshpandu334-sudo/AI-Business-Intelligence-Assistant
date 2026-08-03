@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { useAuth } from './AuthContext';
 import { Dataset } from '../types';
 
 interface DatasetContextType {
   datasets: Dataset[];
+  uniqueDatasets: Dataset[];
   selectedDatasetId: number | undefined;
   selectedDataset: Dataset | null;
   loading: boolean;
@@ -14,6 +16,7 @@ interface DatasetContextType {
 const DatasetContext = createContext<DatasetContextType | undefined>(undefined);
 
 export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [selectedDatasetId, setSelectedDatasetIdState] = useState<number | undefined>(() => {
     const saved = localStorage.getItem('selected_dataset_id');
@@ -59,19 +62,38 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
+  // Synchronize datasets loading with user authentication lifecycle
   useEffect(() => {
-    loadDatasets();
-  }, []);
+    if (user) {
+      loadDatasets();
+    } else {
+      setDatasets([]);
+      setSelectedDatasetIdState(undefined);
+      localStorage.removeItem('selected_dataset_id');
+      setLoading(false);
+    }
+  }, [user]);
 
   const refreshDatasets = async (forceSelectId?: number) => {
     return loadDatasets(forceSelectId);
   };
+
+  // Safety layer deduplication by unique dataset ID
+  const uniqueDatasets = React.useMemo(() => {
+    const seen = new Set<number>();
+    return datasets.filter(dataset => {
+      if (seen.has(dataset.id)) return false;
+      seen.add(dataset.id);
+      return true;
+    });
+  }, [datasets]);
 
   const selectedDataset = datasets.find(d => d.id === selectedDatasetId) || null;
 
   return (
     <DatasetContext.Provider value={{
       datasets,
+      uniqueDatasets,
       selectedDatasetId,
       selectedDataset,
       loading,
