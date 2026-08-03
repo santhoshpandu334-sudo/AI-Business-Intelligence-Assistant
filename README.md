@@ -867,3 +867,703 @@ Business Decision Making
 ✔ Automatic Profiling
 
 ---
+# ✨ Feature Walkthrough
+
+This platform is divided into multiple intelligent modules that work together to provide an end-to-end AI-powered Business Intelligence solution.
+
+---
+
+# 📊 Executive Dashboard
+
+The Executive Dashboard provides a real-time overview of business performance after a dataset is uploaded.
+
+### Features
+
+- 📈 Revenue Analytics
+- 💰 Profit Analysis
+- 📊 KPI Cards
+- 📉 Monthly Trends
+- 🌍 Regional Performance
+- 🏆 Top Performing Products
+- ⚠ Business Alerts
+- 📅 Dataset Summary
+
+### Dashboard Metrics
+
+- Total Revenue
+- Total Profit
+- Total Customers
+- Number of Orders
+- Growth Rate
+- Quality Score
+- Total Records
+- Total Columns
+
+---
+
+### Dashboard Preview
+
+> 📸 Add Dashboard Screenshot Here
+
+```
+/screenshots/dashboard.png
+```
+
+---
+
+# 📂 Smart Dataset Upload
+
+The Dataset Upload module allows users to upload business datasets securely while automatically profiling and validating the data.
+
+### Supported Formats
+
+- CSV
+- Excel (.xlsx)
+- Excel (.xls)
+- JSON
+
+### Automatic Processing
+
+✔ File Validation
+
+✔ Schema Detection
+
+✔ Missing Value Detection
+
+✔ Duplicate Detection
+
+✔ Data Cleaning
+
+✔ Column Profiling
+
+✔ Data Quality Analysis
+
+✔ Dataset Statistics
+
+✔ Storage in Database
+
+---
+
+### Upload Workflow
+
+```
+Select Dataset
+
+↓
+
+Validate File
+
+↓
+
+Clean Dataset
+
+↓
+
+Generate Statistics
+
+↓
+
+Store Database
+
+↓
+
+Dashboard Ready
+```
+
+---
+
+### Upload Screenshot
+
+> 📸 Add Upload Page Screenshot Here
+
+```
+/screenshots/upload.png
+```
+
+---
+
+# 🤖 AI Business Assistant
+
+The AI Chat module allows business users to communicate with their data using natural language.
+
+Instead of writing SQL queries or manually exploring dashboards, users simply ask questions.
+
+### Example Questions
+
+```
+Show top customers.
+
+```
+
+```
+Predict next month's revenue.
+
+```
+
+```
+Which region performed best?
+
+```
+
+```
+What caused the revenue decline?
+
+```
+
+```
+Compare profit across categories.
+
+```
+
+```
+Summarize this dataset.
+
+```
+
+---
+
+### AI Capabilities
+
+- Natural Language Understanding
+- Context-Aware Responses
+- Dataset Question Answering
+- Executive Summaries
+- Business Recommendations
+- Interactive Conversations
+
+---
+
+### AI Chat Screenshot
+
+> 📸 Add AI Chat Screenshot Here
+
+```
+/screenshots/chat.png
+```
+
+---
+
+# 🧠 Retrieval-Augmented Generation (RAG)
+
+The AI assistant uses Retrieval-Augmented Generation (RAG) to improve response accuracy.
+
+Instead of relying only on a language model, the assistant retrieves relevant information from the uploaded datasets before generating an answer.
+
+### RAG Pipeline
+
+```
+Dataset Upload
+
+↓
+
+Data Cleaning
+
+↓
+
+Text Extraction
+
+↓
+
+Embedding Generation
+
+↓
+
+Vector Storage (FAISS)
+
+↓
+
+Similarity Search
+
+↓
+
+Relevant Context
+
+↓
+
+Large Language Model
+
+↓
+
+Business Answer
+```
+
+### Benefits
+
+- Higher Accuracy
+- Context-Aware Answers
+- Reduced Hallucinations
+- Faster Information Retrieval
+- Enterprise Knowledge Search
+
+---
+
+# 📈 Predictive Forecasting
+
+The forecasting engine predicts future business performance based on historical data.
+
+### Features
+
+- Revenue Forecasting
+- Sales Forecast
+- Trend Prediction
+- Future KPI Estimation
+- Growth Projection
+
+### Forecast Outputs
+
+- Forecast Charts
+- Predicted Revenue
+- Confidence Indicators
+- Trend Analysis
+- Business Recommendations
+
+---
+
+### Forecast Screenshot
+
+> 📸 Add Forecast Screenshot Here
+
+```
+/screenshots/forecast.png
+```
+
+---
+
+# 💡 AI Insights Engine
+
+The Insights Engine automatically analyzes datasets and generates business intelligence without requiring manual exploration.
+
+### Generated Insights
+
+📈 Revenue Trends
+
+💰 Profit Analysis
+
+📊 Customer Behaviour
+
+🏆 Top Products
+
+🌍 Regional Performance
+
+⚠ Risk Factors
+
+📉 Declining Metrics
+
+🚀 Growth Opportunities
+
+---
+
+### Business Recommendations
+
+Examples include:
+
+- Increase investment in high-performing regions.
+- Focus marketing on profitable customer segments.
+- Reduce costs in underperforming categories.
+- Optimize inventory for seasonal demand.
+
+---
+
+### Insights Screenshot
+
+> 📸 Add Insights Screenshot Here
+
+```
+/screenshots/insights.png
+```
+
+---
+
+# 🚨 Anomaly Detection
+
+The platform automatically detects unusual patterns in business data.
+
+### Detects
+
+- Revenue Drops
+- Profit Loss
+- Outliers
+- Suspicious Transactions
+- Data Errors
+- Unexpected Trends
+
+This helps organizations identify potential issues before they become major business problems.
+
+---
+
+# 📄 Report Generation
+
+Generate professional business reports in a single click.
+
+### Export Formats
+
+- PDF
+- Excel
+- CSV
+
+Reports include:
+
+- Executive Summary
+- KPI Overview
+- Charts
+- Forecast Results
+- AI Insights
+- Recommendations
+
+---
+
+### Reports Screenshot
+
+> 📸 Add Reports Screenshot Here
+
+```
+/screenshots/reports.png
+```
+
+---
+
+# 👨‍💼 Admin Console
+
+Administrators can manage the entire platform from a centralized dashboard.
+
+### Features
+
+- User Management
+- Dataset Monitoring
+- Audit Logs
+- Role Management
+- Platform Statistics
+- Activity Tracking
+
+---
+
+### User Roles
+
+| Role | Permissions |
+|------|-------------|
+| Admin | Full Access |
+| Manager | Business Operations |
+| Analyst | Analytics & Reports |
+
+---
+
+### Admin Screenshot
+
+> 📸 Add Admin Dashboard Screenshot Here
+
+```
+/screenshots/admin.png
+```
+
+---
+
+# 🔒 Security Features
+
+The application follows enterprise-grade security practices.
+
+### Security Highlights
+
+- JWT Authentication
+- Password Hashing
+- Role-Based Access Control (RBAC)
+- Protected API Endpoints
+- Audit Logging
+- Secure File Upload
+- Input Validation
+- SQL Injection Protection
+- CORS Protection
+
+---
+
+# 📈 Business Intelligence Workflow
+
+```
+Upload Dataset
+      │
+      ▼
+Validate Data
+      │
+      ▼
+Clean Dataset
+      │
+      ▼
+Generate Statistics
+      │
+      ▼
+Store in Database
+      │
+      ▼
+AI Processing
+      │
+      ▼
+Dashboard Analytics
+      │
+      ▼
+Business Insights
+      │
+      ▼
+Forecast Future
+      │
+      ▼
+Generate Reports
+      │
+      ▼
+Business Decision Support
+```
+
+---
+
+# 🎯 Enterprise Benefits
+
+✔ Faster Decision Making
+
+✔ AI-Powered Business Analysis
+
+✔ Improved Data Quality
+
+✔ Reduced Manual Reporting
+
+✔ Intelligent Forecasting
+
+✔ Secure Enterprise Architecture
+
+✔ Scalable Full-Stack Design
+
+✔ Executive-Level Reporting
+
+✔ Interactive Data Exploration
+
+✔ AI-Assisted Business Intelligence
+
+---# 📸 Project Screenshots
+
+> Replace the placeholders below with your actual screenshots.
+
+## 🏠 Landing Page
+
+![Landing Page](screenshots/landing.png)
+
+---
+
+## 📊 Executive Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+---
+
+## 📂 Dataset Upload
+
+![Upload](screenshots/upload.png)
+
+---
+
+## 🤖 AI Business Assistant
+
+![AI Chat](screenshots/chat.png)
+
+---
+
+## 📈 Forecasting
+
+![Forecast](screenshots/forecast.png)
+
+---
+
+## 💡 AI Insights
+
+![Insights](screenshots/insights.png)
+
+---
+
+## 📄 Reports
+
+![Reports](screenshots/reports.png)
+
+---
+
+## 👨‍💼 Admin Console
+
+![Admin](screenshots/admin.png)
+
+---
+
+# 🎥 Demo
+
+A short demonstration video showcasing the platform will be added here.
+
+Example:
+
+```
+https://youtu.be/your-demo-video
+```
+
+---
+
+# 🛣️ Future Enhancements
+
+The following improvements are planned for future versions:
+
+- AI-powered Dashboard Narration
+- Multi-language AI Assistant
+- Voice-based Business Queries
+- Real-time Streaming Analytics
+- Power BI Integration
+- Tableau Integration
+- Email Report Scheduling
+- Advanced ML Forecasting Models
+- Automated KPI Alerts
+- Mobile Application
+- Cloud Deployment (AWS/Azure/GCP)
+- Multi-tenant Enterprise Support
+- Team Collaboration Features
+- Interactive Business Storytelling
+- Explainable AI Recommendations
+
+---
+
+# 📊 Project Statistics
+
+| Metric | Value |
+|---------|-------|
+| Frontend | React 19 + TypeScript |
+| Backend | FastAPI |
+| Database | PostgreSQL |
+| Authentication | JWT |
+| AI Framework | LangChain |
+| Vector Database | FAISS |
+| Supported File Formats | CSV, Excel, JSON |
+| User Roles | 3 |
+| Modules | 10+ |
+| REST APIs | 30+ |
+| Enterprise Ready | ✅ |
+
+---
+
+# 🎯 Learning Outcomes
+
+This project demonstrates practical experience in:
+
+- Full Stack Development
+- REST API Development
+- Enterprise Software Architecture
+- Artificial Intelligence Integration
+- Retrieval-Augmented Generation (RAG)
+- Business Intelligence Systems
+- Data Engineering
+- Authentication & Authorization
+- Database Design
+- Data Visualization
+- Machine Learning Integration
+- Software Engineering Best Practices
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome.
+
+If you would like to improve this project:
+
+1. Fork the repository.
+2. Create a feature branch.
+
+```bash
+git checkout -b feature/new-feature
+```
+
+3. Commit your changes.
+
+```bash
+git commit -m "Added new feature"
+```
+
+4. Push your branch.
+
+```bash
+git push origin feature/new-feature
+```
+
+5. Open a Pull Request.
+
+---
+
+# 📝 License
+
+This project is licensed under the MIT License.
+
+See the LICENSE file for more information.
+
+---
+
+# 👨‍💻 Author
+
+## Sumanth Nadipineni
+
+Computer Science Engineering Student
+
+AI • Full Stack Development • Business Intelligence • Machine Learning
+
+GitHub:
+
+```
+https://github.com/sumanthnadipineni26
+```
+
+LinkedIn:
+
+```
+(Add your LinkedIn profile here)
+```
+
+Email:
+
+```
+(Add your professional email here)
+```
+
+---
+
+# 🙏 Acknowledgements
+
+Special thanks to the open-source community and the following technologies:
+
+- FastAPI
+- React
+- TypeScript
+- PostgreSQL
+- LangChain
+- FAISS
+- Pandas
+- NumPy
+- Tailwind CSS
+- Docker
+
+for making modern AI application development accessible.
+
+---
+
+# ⭐ Support
+
+If you found this project useful:
+
+⭐ Star this repository
+
+🍴 Fork the project
+
+🛠️ Contribute improvements
+
+📢 Share it with others
+
+---
+
+<div align="center">
+
+# 🚀 AI Business Intelligence Assistant
+
+### Transforming Business Data into Intelligent Decisions
+
+**Built with ❤️ using FastAPI, React, TypeScript, PostgreSQL, and Artificial Intelligence**
+
+⭐ **If you like this project, don't forget to star the repository!** ⭐
+
+</div>
