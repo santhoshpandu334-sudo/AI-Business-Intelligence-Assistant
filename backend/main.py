@@ -3,10 +3,24 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.db.session import engine, Base
-from app.api.v1 import auth, datasets, analytics, forecast, reports, admin, notifications, chat, insights, decision, consultant
+from app.api.v1 import auth, datasets, analytics, forecast, reports, admin, notifications, chat, insights, decision, consultant, settings as settings_api
 
 # Initialize database tables
 Base.metadata.create_all(bind=engine)
+
+# Ensure User columns for email digest exist (idempotent SQLite/PostgreSQL alteration)
+from sqlalchemy import text
+with engine.connect() as conn:
+    try:
+        conn.execute(text("ALTER TABLE users ADD COLUMN email_digest_enabled BOOLEAN DEFAULT 0;"))
+        conn.commit()
+    except Exception:
+        pass
+    try:
+        conn.execute(text("ALTER TABLE users ADD COLUMN last_digest_sent_at TIMESTAMP;"))
+        conn.commit()
+    except Exception:
+        pass
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -36,6 +50,7 @@ app.include_router(notifications.router, prefix=f"{settings.API_V1_STR}/notifica
 app.include_router(insights.router, prefix=f"{settings.API_V1_STR}/insights", tags=["Executive Insights"])
 app.include_router(decision.router, prefix=f"{settings.API_V1_STR}/decision", tags=["AI Decision Intelligence"])
 app.include_router(consultant.router, prefix=f"{settings.API_V1_STR}/consultant", tags=["AI Business Consultant"])
+app.include_router(settings_api.router, prefix=f"{settings.API_V1_STR}/settings", tags=["Settings"])
 
 
 @app.get("/")

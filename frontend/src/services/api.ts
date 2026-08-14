@@ -231,6 +231,42 @@ export const api = {
     return res.json();
   },
 
+  async getEmailPreference(): Promise<{ email_digest_enabled: boolean; user_email: string; last_digest_sent: string | null }> {
+    const res = await fetch(`${API_BASE}/settings/email-digest`, { headers: getHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch email preference');
+    return res.json();
+  },
+
+  async updateEmailPreference(enabled: boolean): Promise<{ email_digest_enabled: boolean; user_email: string; last_digest_sent: string | null }> {
+    const res = await fetch(`${API_BASE}/settings/email-digest`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ email_digest_enabled: enabled })
+    });
+    if (!res.ok) throw new Error('Failed to update email preference');
+    return res.json();
+  },
+
+  async triggerEmailDigestTest(datasetId?: number | null): Promise<{ message: string }> {
+    const url = datasetId
+      ? `${API_BASE}/settings/email-digest/test?dataset_id=${datasetId}`
+      : `${API_BASE}/settings/email-digest/test`;
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: getHeaders()
+    });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "Failed to trigger email test");
+      try {
+        const parsed = JSON.parse(errText);
+        throw new Error(parsed.detail || "Failed to trigger email test");
+      } catch {
+        throw new Error(errText);
+      }
+    }
+    return res.json();
+  },
+
   // RAG Analytics & Insights
   async sendRAGChat(message: string, dataset_id?: number) {
     const res = await fetch(`${API_BASE}/analytics/chat`, {

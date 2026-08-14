@@ -18,6 +18,10 @@ dist/
 .vscode/
 .idea/
 
+# Email Previews
+email_previews/
+backend/email_previews/
+
 # Logs
 *.log
 
@@ -27,3 +31,5 @@ Thumbs.db
 frontend/tsconfig.tsbuildinfo
 frontend/src/*.bak
 backend/exports/*.pdf
+
+backend/uploads/

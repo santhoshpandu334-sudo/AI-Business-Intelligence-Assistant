@@ -23,6 +23,8 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    email_digest_enabled = Column(Boolean, default=False)
+    last_digest_sent_at = Column(DateTime, nullable=True)
 
     datasets = relationship("Dataset", back_populates="owner")
     reports = relationship("Report", back_populates="user")

@@ -88,7 +88,19 @@ def list_datasets(
                 b"2026-01-15,120000,45000,Bangalore,Software,Acme Corp\n"
                 b"2026-02-15,150000,55000,Hyderabad,Cloud,Global Tech\n"
                 b"2026-03-15,98000,32000,Bangalore,Hardware,Alpha Solutions\n"
-                b"2026-04-15,172000,68000,Hyderabad,SaaS,Omega Ventures"
+                b"2026-04-15,172000,68000,Hyderabad,SaaS,Omega Ventures\n"
+                b"2026-05-15,190000,75000,Bangalore,Software,Delta Partner\n"
+                b"2026-06-15,210000,85000,Hyderabad,Cloud,Sigma Corp\n"
+                b"2026-07-15,220000,90000,Bangalore,Hardware,Epsilon Inc\n"
+                b"2026-08-15,240000,98000,Hyderabad,SaaS,Zeta Systems\n"
+                b"2026-09-15,250000,105000,Bangalore,Software,Theta Tech\n"
+                b"2026-10-15,270000,115000,Hyderabad,Cloud,Kappa LLC\n"
+                b"2026-11-15,280000,120000,Bangalore,Hardware,Lambda Co\n"
+                b"2026-12-15,300000,130000,Hyderabad,SaaS,Mu Ventures\n"
+                b"2027-01-15,310000,135000,Bangalore,Software,Nu Partners\n"
+                b"2027-02-15,330000,145000,Hyderabad,Cloud,Xi Group\n"
+                b"2027-03-15,340000,150000,Bangalore,Hardware,Omicron Ltd\n"
+                b"2027-04-15,1900000,750000,Hyderabad,SaaS,Omega Ventures"
             ),
             owner_id=current_user.id,
             company_name=current_user.company_name or "Acme Corp",

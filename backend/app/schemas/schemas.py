@@ -41,6 +41,8 @@ class UserResponse(UserBase):
     is_active: bool
     is_verified: bool
     created_at: datetime
+    email_digest_enabled: bool = False
+    last_digest_sent_at: Optional[datetime] = None
 
 # Dataset Schemas
 class DatasetBase(BaseModel):
@@ -580,6 +582,15 @@ class DecisionHistoryItem(BaseModel):
     output_summary: str
     confidence_score: float
     risk_level: str
+
+
+class EmailDigestPreferenceResponse(BaseModel):
+    email_digest_enabled: bool
+    user_email: str
+    last_digest_sent: Optional[datetime] = None
+
+class EmailDigestPreferenceUpdate(BaseModel):
+    email_digest_enabled: bool
 
 
 

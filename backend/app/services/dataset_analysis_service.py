@@ -316,15 +316,51 @@ class DatasetAnalysisService:
             })
             recs_count += 1
 
-        # Fill up to 5 recommendations
-        while len(recommendations) < 5:
-            recommendations.append({
+        # Fill up to 5 recommendations with distinct items
+        fallbacks = [
+            {
                 "title": "Establish Automated Schema Monitoring Alert triggers",
                 "priority": "Low",
                 "benefit": "Triggers alert flags immediately upon metric drift",
                 "impact": "Keeps operations within calculated safe variance parameters.",
                 "confidence_score": 85.0
-            })
+            },
+            {
+                "title": "Implement Segmented Quality Score Reports",
+                "priority": "Low",
+                "benefit": "Identifies localized record errors or missing fields early",
+                "impact": "Improves overall database completeness metrics.",
+                "confidence_score": 82.0
+            },
+            {
+                "title": "Audit Data Pipeline Logging Infrastructure",
+                "priority": "Low",
+                "benefit": "Maintains trace history for pipeline errors",
+                "impact": "Ensures transaction logging remains consistent.",
+                "confidence_score": 80.0
+            },
+            {
+                "title": "Optimize Data Storage Partitioning and Indexing",
+                "priority": "Low",
+                "benefit": "Improves analytics search times and retrieval latencies",
+                "impact": "Reduces query execution load on large tables.",
+                "confidence_score": 86.0
+            },
+            {
+                "title": "Set Up Scheduled Backup and Recovery Protocols",
+                "priority": "Low",
+                "benefit": "Guarantees system continuity in case of failure",
+                "impact": "Secures uploaded files and database integrity.",
+                "confidence_score": 89.0
+            }
+        ]
+
+        for fb in fallbacks:
+            if len(recommendations) >= 5:
+                break
+            # Avoid adding if a recommendation with the same title already exists
+            if not any(r["title"] == fb["title"] for r in recommendations):
+                recommendations.append(fb)
 
         recommendations = recommendations[:5]
 
@@ -394,11 +430,30 @@ class DatasetAnalysisService:
         cols_lower = [c.lower() for c in all_cols]
 
         # Student Keywords
-        student_keys = ["student", "mark", "score", "grade", "gpa", "attendance", "course", "subject", "roll"]
+        student_keys = ["student", "mark", "score", "grade", "gpa", "cgpa", "attendance", "course", "subject", "roll"]
         student_matches = [k for k in student_keys if any(k in c for c in cols_lower)]
         if student_matches:
             scores["Student/Education"] += len(student_matches) * 20
             reasons.append(f"Student identifiers detected: {student_matches}")
+
+        # Cell-values Designation Check for Students
+        # If the dataset contains designative/role columns and has "student" cell values, it's a strong signal.
+        # However, to avoid false positives on Sales datasets with customer demographics, we skip if it has clear Sales metrics.
+        looks_like_sales = any(any(k in c.lower() for k in ["revenue", "profit", "sales", "orders"]) for c in all_cols)
+        if not looks_like_sales:
+            has_student_values = False
+            for c in all_cols:
+                if any(k in c.lower() for k in ["designation", "role", "title", "occupation", "category", "type", "name"]):
+                    try:
+                        if df is not None and not df.empty:
+                            if df[c].head(50).astype(str).str.lower().str.contains("student").any():
+                                has_student_values = True
+                                break
+                    except Exception:
+                        pass
+            if has_student_values:
+                scores["Student/Education"] += 80
+                reasons.append("Row data contains cell values with 'student' designation")
 
         # HR Keywords
         hr_keys = ["employee", "salary", "hire", "department", "role", "attrition", "performance", "tenure"]
