@@ -11,6 +11,8 @@ from app.schemas.schemas import (
 from app.api.deps import get_current_user, require_roles
 from app.services.rag_service import RAGPipelineService
 
+from app.services.dataset_analysis_service import DatasetAnalysisService
+
 router = APIRouter()
 
 @router.post("/conversations", response_model=ConversationResponse)
@@ -29,20 +31,51 @@ def create_conversation(
     db.commit()
     db.refresh(conv)
 
-    # Add welcome message
+    # Dynamic Welcome message and suggestions
+    dataset_id = conv.dataset_id
+    if not dataset_id:
+        # Fallback to latest uploaded
+        ds = db.query(Dataset).order_by(Dataset.created_at.desc()).first()
+        dataset_id = ds.id if ds else None
+
+    domain = "Generic"
+    suggestions = ["What columns are available?", "Summarize this dataset", "Show key statistics", "Detect anomalies"]
+
+    if dataset_id:
+        try:
+            analysis = DatasetAnalysisService.get_analysis(db, dataset_id)
+            domain = analysis["detected_domains"]["primary_domain"]
+            if domain == "Student/Education":
+                suggestions = [
+                    "Summarize this dataset",
+                    "Which students scored highest?",
+                    "Show attendance statistics",
+                    "Explain the GPA distribution"
+                ]
+            elif domain == "Sales/Finance":
+                suggestions = [
+                    "Which products generated the highest sales?",
+                    "Show monthly sales trend",
+                    "What are the biggest revenue drivers?"
+                ]
+            elif domain == "HR/Employee":
+                suggestions = [
+                    "Summarize this dataset",
+                    "What is the average employee salary?",
+                    "Show attrition rates",
+                    "Explain department distributions"
+                ]
+        except Exception:
+            pass
+
     welcome_msg = ChatMessageModel(
         conversation_id=conv.id,
         sender="assistant",
-        message_text=f"Welcome! I am your AI Business Intelligence Assistant powered by LangChain, FAISS RAG, and `{conv.model_provider.upper()}`. Ask any natural language question regarding datasets, sales trends, regional ARR, or customer churn.",
+        message_text=f"Welcome! I am your AI Business Intelligence Assistant powered by LangChain, FAISS RAG, and `{conv.model_provider.upper()}`. Ask any natural language question regarding your active dataset.",
         sources_json=["RAG Vector Storage Active"],
         data_summary_json={"Model Provider": conv.model_provider.upper(), "Status": "Ready for Query"},
         confidence_score=99.0,
-        follow_ups_json=[
-            "Why did sales decrease in March?",
-            "Which region generated maximum revenue?",
-            "Compare Bangalore and Hyderabad ARR.",
-            "Which customer accounts exhibit churn risk?"
-        ]
+        follow_ups_json=suggestions
     )
     db.add(welcome_msg)
     db.commit()

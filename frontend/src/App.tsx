@@ -23,6 +23,7 @@ import { NotificationsPage } from './pages/NotificationsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { DecisionIntelligencePage } from './pages/DecisionIntelligencePage';
+import { BusinessConsultantPage } from './pages/BusinessConsultantPage';
 
 
 const queryClient = new QueryClient({
@@ -57,6 +58,7 @@ export const App: React.FC = () => {
                   <Route path="/forecast" element={<ForecastPage />} />
                   <Route path="/insights" element={<InsightsPage />} />
                   <Route path="/decision" element={<DecisionIntelligencePage />} />
+                  <Route path="/consultant" element={<BusinessConsultantPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/settings" element={<SettingsPage />} />

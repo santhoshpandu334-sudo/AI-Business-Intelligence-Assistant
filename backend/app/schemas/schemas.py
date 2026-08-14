@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional, List, Any, Dict
+from typing import Optional, List, Any, Dict, Union
 from pydantic import BaseModel, EmailStr, ConfigDict
 
 # Auth & User Schemas
@@ -296,21 +296,23 @@ class AdminStatsResponse(BaseModel):
 
 # Phase 4 Analytics Dashboard Schemas
 class KPIDashboardResponse(BaseModel):
-    total_revenue: float
-    total_profit: float
-    active_customers: int
-    total_orders: int
-    avg_order_value: float
-    profit_margin: float
+    total_revenue: Union[float, str]
+    total_profit: Union[float, str]
+    active_customers: Union[int, str]
+    total_orders: Union[int, str]
+    avg_order_value: Union[float, str]
+    profit_margin: Union[float, str]
     dataset_health_score: float
     revenue_growth_pct: float
     profit_growth_pct: float
+    dynamic_kpis: Optional[List[Dict[str, Any]]] = None
 
 class ChartDataPoint(BaseModel):
     date: str
-    revenue: float
-    profit: float
-    orders: int
+    revenue: Optional[float] = 0.0
+    profit: Optional[float] = 0.0
+    orders: Optional[int] = 0
+    value: Optional[float] = 0.0
 
 class ProductDataPoint(BaseModel):
     name: str
@@ -342,6 +344,11 @@ class DashboardSummaryResponse(BaseModel):
     kpis: KPIDashboardResponse
     charts: ChartsDashboardResponse
     health: BusinessHealthResponse
+    domain: Optional[str] = None
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    available_filters: Optional[List[str]] = None
+    filter_metadata: Optional[Dict[str, str]] = None
 
 # Phase 5 Forecasting & Anomaly Detection Schemas
 class ForecastDataPointResponse(BaseModel):

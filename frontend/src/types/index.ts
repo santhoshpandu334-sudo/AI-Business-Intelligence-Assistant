@@ -215,17 +215,17 @@ export interface AdminStats {
   active_companies: number;
 }
 
-// Phase 4 Analytics Dashboard Interfaces
 export interface KPIDashboardData {
-  total_revenue: number;
-  total_profit: number;
-  active_customers: number;
-  total_orders: number;
-  avg_order_value: number;
-  profit_margin: number;
+  total_revenue: number | string;
+  total_profit: number | string;
+  active_customers: number | string;
+  total_orders: number | string;
+  avg_order_value: number | string;
+  profit_margin: number | string;
   dataset_health_score: number;
   revenue_growth_pct: number;
   profit_growth_pct: number;
+  dynamic_kpis?: { key: string; name: string; value: number | string }[];
 }
 
 export interface ChartDataPoint {
@@ -270,6 +270,11 @@ export interface DashboardSummaryData {
   kpis: KPIDashboardData;
   charts: ChartsDashboardData;
   health: BusinessHealthData;
+  domain?: string;
+  title?: string;
+  subtitle?: string;
+  available_filters?: string[];
+  filter_metadata?: Record<string, string>;
 }
 
 // Phase 5 Forecasting & Anomaly Interfaces

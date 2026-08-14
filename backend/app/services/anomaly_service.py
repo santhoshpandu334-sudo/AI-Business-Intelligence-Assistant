@@ -74,44 +74,8 @@ class AnomalyDetectionService:
             except Exception:
                 pass
 
-        if not anomalies_to_create:
-            # Fallback default anomalies
-            anomalies_to_create = [
-                AnomalyResult(
-                    dataset_id=dataset_id,
-                    row_index=45,
-                    anomaly_score=0.94,
-                    anomaly_type="revenue_spike",
-                    reasoning="Abnormal revenue spike detected. Value exceeds 4.2 standard deviations from 30-day moving average. Action: Audit invoice generation.",
-                    payload_json={"date": "2025-02-14", "revenue": 165000, "expected": 100000, "z_score": 4.2}
-                ),
-                AnomalyResult(
-                    dataset_id=dataset_id,
-                    row_index=110,
-                    anomaly_score=0.88,
-                    anomaly_type="fraud_risk",
-                    reasoning="Unusual transaction drop combined with elevated refund rate on account #AC-8891. Action: CS outreach.",
-                    payload_json={"date": "2025-04-20", "refunds": 18, "normal_avg": 1.2, "flag": "High Fraud Alert"}
-                ),
-                AnomalyResult(
-                    dataset_id=dataset_id,
-                    row_index=150,
-                    anomaly_score=0.91,
-                    anomaly_type="duplicate_transaction",
-                    reasoning="Duplicate invoice signature matched across two enterprise accounts ($80,000). Action: Double billing audit.",
-                    payload_json={"invoice_ref": "INV-2025-9921", "amount": 80000, "status": "Potential Double Billing"}
-                ),
-                AnomalyResult(
-                    dataset_id=dataset_id,
-                    row_index=162,
-                    anomaly_score=0.82,
-                    anomaly_type="unusual_pattern",
-                    reasoning="Abnormal spike in API call volume coincided with zero revenue conversion. Action: Verify client analytics.",
-                    payload_json={"api_calls": 45000, "conversions": 0, "normal_rate": "3.5%"}
-                )
-            ]
-
-        db.add_all(anomalies_to_create)
-        db.commit()
-
+        if anomalies_to_create:
+            db.add_all(anomalies_to_create)
+            db.commit()
+            
         return db.query(AnomalyResult).filter(AnomalyResult.dataset_id == dataset_id).all()

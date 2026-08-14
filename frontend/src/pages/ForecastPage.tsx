@@ -56,7 +56,7 @@ export const ForecastPage: React.FC = () => {
       const data = await api.getForecastDashboard(datasetId, horizon);
       setDashboardData(data);
     } catch (err: any) {
-      setError("Error running predictive ML model. Verify dataset formats.");
+      setError(err.message || "Error running predictive ML model. Verify dataset formats.");
     } finally {
       setLoading(false);
     }

@@ -13,6 +13,7 @@ from app.services.rag_service import RAGChatService
 from app.services.insights_service import InsightsEngineService
 from app.services.anomaly_service import AnomalyDetectionService
 from app.services.analytics_service import AnalyticsDashboardService
+from app.services.dataset_analysis_service import DatasetAnalysisService
 
 
 router = APIRouter()
@@ -65,6 +66,52 @@ def get_dashboard_summary(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+    analysis = DatasetAnalysisService.get_analysis(db, dataset_id)
+    domain = analysis["detected_domains"]["primary_domain"]
+    
+    if domain == "Student/Education":
+        title = "Student Performance Analytics"
+        subtitle = "Detailed academic metrics and student evaluation metrics"
+    elif domain == "HR/Employee":
+        title = "Workforce Analytics"
+        subtitle = "Detailed employee statistics, performance metrics, and attrition tracking"
+    elif domain == "Manufacturing":
+        title = "Manufacturing Performance Analytics"
+        subtitle = "Detailed production yield, defect rates, and machine performance analytics"
+    elif domain == "Sales/Finance":
+        title = "Sales Performance Analytics"
+        subtitle = "Detailed revenue margins, profit figures, and orders performance metrics"
+    else:
+        title = "Dataset Analytics Workspace"
+        subtitle = "General statistical overview and data distributions"
+
+    # Filter metadata mapping (maps frontend filter keys to friendly dataset-specific names)
+    filter_metadata = {}
+    schema = analysis.get("schema_metadata", {})
+    all_cols = schema.get("all_columns", [])
+    
+    product_col = next((c for c in all_cols if any(k in c.lower() for k in ["product", "course", "subject", "major", "item", "part"])), None)
+    if product_col:
+        filter_metadata["product"] = product_col.replace('_', ' ').title()
+        
+    region_col = next((c for c in all_cols if any(k in c.lower() for k in ["region", "location", "class", "grade", "branch", "office", "site"])), None)
+    if region_col:
+        filter_metadata["region"] = region_col.replace('_', ' ').title()
+        
+    category_col = next((c for c in all_cols if any(k in c.lower() for k in ["category", "gender", "dept", "department", "type", "segment"])), None)
+    if category_col:
+        filter_metadata["category"] = category_col.replace('_', ' ').title()
+        
+    customer_col = next((c for c in all_cols if any(k in c.lower() for k in ["customer", "client", "buyer", "student", "employee", "name"])), None)
+    if customer_col:
+        filter_metadata["customer"] = customer_col.replace('_', ' ').title()
+
+    date_col = next((c for c in all_cols if any(k in c.lower() for k in ["date", "time"]) or c in schema.get("date_columns", [])), None)
+    if date_col:
+        filter_metadata["date"] = "Date"
+
+    available_filters = list(filter_metadata.keys())
+
     kpis = AnalyticsDashboardService.get_kpis(
         db, dataset_id, start_date, end_date, product, region, category, customer
     )
@@ -76,7 +123,12 @@ def get_dashboard_summary(
     return {
         "kpis": kpis,
         "charts": charts,
-        "health": health
+        "health": health,
+        "domain": domain,
+        "title": title,
+        "subtitle": subtitle,
+        "available_filters": available_filters,
+        "filter_metadata": filter_metadata
     }
 
 @router.get("/kpis", response_model=KPIDashboardResponse)

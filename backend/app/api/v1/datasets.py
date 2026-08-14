@@ -17,6 +17,7 @@ from app.api.deps import get_current_user, require_roles
 from app.services.dataset_service import DatasetService
 from app.services.insights_service import InsightsEngineService
 from app.services.admin_service import AdminService
+from app.services.consultant_service import BusinessConsultantService
 
 router = APIRouter()
 
@@ -61,6 +62,7 @@ async def upload_dataset(
         )
         # Auto-trigger AI insights generation
         InsightsEngineService.generate_all_insights(db, dataset.id)
+        BusinessConsultantService.invalidate_cache(dataset.id)
         return dataset
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
@@ -145,6 +147,7 @@ def update_dataset_metadata(
 
     db.commit()
     db.refresh(dataset)
+    BusinessConsultantService.invalidate_cache(dataset_id)
 
     AdminService.log_action(
         db, current_user.id, "RENAME_DATASET", 
@@ -165,6 +168,7 @@ def delete_dataset(
     dataset_name = dataset.name
     db.delete(dataset)
     db.commit()
+    BusinessConsultantService.invalidate_cache(dataset_id)
 
     AdminService.log_action(
         db, current_user.id, "DELETE_DATASET", 

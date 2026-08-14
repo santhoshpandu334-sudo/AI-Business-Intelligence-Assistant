@@ -13,7 +13,8 @@ import {
   User, 
   ChevronRight,
   Zap,
-  Brain
+  Brain,
+  Briefcase
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -26,6 +27,7 @@ export const Sidebar: React.FC = () => {
     { label: 'AI Chat (NLQ)', path: '/chat', icon: Bot },
     { label: 'ML Forecast', path: '/forecast', icon: TrendingUp },
     { label: 'AI Insights', path: '/insights', icon: Sparkles },
+    { label: 'Business Consultant', path: '/consultant', icon: Briefcase },
     { label: 'Decision Intelligence', path: '/decision', icon: Brain },
     { label: 'Reports Engine', path: '/reports', icon: FileText },
     ...(user?.role === 'Admin' ? [{ label: 'Admin Console', path: '/admin', icon: ShieldAlert }] : []),

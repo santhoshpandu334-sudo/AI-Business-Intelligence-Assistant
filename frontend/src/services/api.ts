@@ -525,6 +525,58 @@ export const api = {
       throw new Error(err.detail || 'Failed to fetch decision history');
     }
     return res.json();
+  },
+
+  async getConsultantReport(datasetId: number): Promise<any> {
+    const res = await fetch(`${API_BASE}/consultant/report/${datasetId}`, { headers: getHeaders() });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to fetch consultant report' }));
+      throw new Error(err.detail || 'Failed to fetch consultant report');
+    }
+    return res.json();
+  },
+
+  async analyzeBusiness(datasetId: number): Promise<any> {
+    const res = await fetch(`${API_BASE}/consultant/analyze/${datasetId}`, {
+      method: 'POST',
+      headers: getHeaders()
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to run business analysis' }));
+      throw new Error(err.detail || 'Failed to run business analysis');
+    }
+    return res.json();
+  },
+
+  async explainReportSection(datasetId: number, sectionId: string, report: any): Promise<any> {
+    const res = await fetch(`${API_BASE}/consultant/explain`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ dataset_id: datasetId, section_id: sectionId, report })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to generate explanation' }));
+      throw new Error(err.detail || 'Failed to generate explanation');
+    }
+    return res.json();
+  },
+
+  async askConsultant(datasetId: number, question: string, report: any, chatHistory: any[]): Promise<any> {
+    const res = await fetch(`${API_BASE}/consultant/ask`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ dataset_id: datasetId, question, report, chat_history: chatHistory })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to get consultant response' }));
+      throw new Error(err.detail || 'Failed to get consultant response');
+    }
+    return res.json();
+  },
+
+  downloadConsultantReportUrl(datasetId: number): string {
+    const token = localStorage.getItem('access_token');
+    return `${API_BASE}/consultant/report/${datasetId}/download?token=${token || ''}`;
   }
 };
 

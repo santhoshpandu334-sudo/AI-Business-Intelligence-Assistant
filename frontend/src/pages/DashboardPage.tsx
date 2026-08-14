@@ -42,6 +42,26 @@ import { api } from '../services/api';
 import { Dataset, Insight, DashboardSummaryData } from '../types';
 import { useDataset } from '../context/DatasetContext';
 
+const getKpiIcon = (key: string) => {
+  const k = key.toLowerCase();
+  if (k.includes('revenue') || k.includes('sales') || k.includes('salary')) return <DollarSign className="w-4 h-4" />;
+  if (k.includes('profit') || k.includes('margin') || k.includes('gpa') || k.includes('score') || k.includes('marks') || k.includes('attendance')) return <TrendingUp className="w-4 h-4" />;
+  if (k.includes('order') || k.includes('transaction') || k.includes('count')) return <ShoppingBag className="w-4 h-4" />;
+  if (k.includes('customer') || k.includes('student') || k.includes('employee') || k.includes('user') || k.includes('client')) return <Users className="w-4 h-4" />;
+  if (k.includes('health') || k.includes('quality') || k.includes('completeness')) return <CheckCircle className="w-4 h-4" />;
+  return <Activity className="w-4 h-4" />;
+};
+
+const getKpiColorClass = (key: string) => {
+  const k = key.toLowerCase();
+  if (k.includes('revenue') || k.includes('sales') || k.includes('salary')) return 'bg-indigo-500/10 text-indigo-400';
+  if (k.includes('profit') || k.includes('margin')) return 'bg-emerald-500/10 text-emerald-400';
+  if (k.includes('order') || k.includes('transaction')) return 'bg-purple-500/10 text-purple-400';
+  if (k.includes('customer') || k.includes('student') || k.includes('employee') || k.includes('user') || k.includes('client')) return 'bg-blue-500/10 text-blue-400';
+  if (k.includes('health') || k.includes('quality') || k.includes('gpa') || k.includes('score') || k.includes('marks') || k.includes('attendance')) return 'bg-amber-500/10 text-amber-400';
+  return 'bg-slate-500/10 text-slate-400';
+};
+
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { datasets, uniqueDatasets, selectedDatasetId, setSelectedDatasetId, loading: datasetsLoading } = useDataset();
@@ -136,6 +156,7 @@ export const DashboardPage: React.FC = () => {
       dataset_health_score: 0,
       revenue_growth_pct: 0,
       profit_growth_pct: 0,
+      dynamic_kpis: []
     },
     charts: {
       trend_data: [],
@@ -149,7 +170,12 @@ export const DashboardPage: React.FC = () => {
       customer_score: 0,
       inventory_score: 0,
       overall_score: 0,
-    }
+    },
+    domain: "",
+    title: "",
+    subtitle: "",
+    available_filters: [],
+    filter_metadata: {}
   };
   const activeSummary = summary || emptySummary;
 
@@ -160,11 +186,14 @@ export const DashboardPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
-              Executive Analytics Workspace
+              {summary?.domain ? `${summary.domain} Workspace` : "Executive Analytics Workspace"}
             </span>
             <span className="text-xs text-slate-400 font-mono">Live RAG Aggregator</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">Enterprise Performance Analytics</h1>
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">{summary?.title || "Enterprise Performance Analytics"}</h1>
+          {summary?.subtitle && (
+            <p className="text-xs text-slate-400 mt-1">{summary.subtitle}</p>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -212,64 +241,84 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <div>
-            <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">Start Date</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-slate-950 text-xs text-white rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">End Date</label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-950 text-xs text-white rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">Product</label>
-            <input
-              type="text"
-              value={filterProduct}
-              onChange={(e) => setFilterProduct(e.target.value)}
-              placeholder="e.g. AI Suite"
-              className="w-full bg-slate-950 text-xs text-white placeholder-slate-600 rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">Region</label>
-            <input
-              type="text"
-              value={filterRegion}
-              onChange={(e) => setFilterRegion(e.target.value)}
-              placeholder="e.g. Bangalore"
-              className="w-full bg-slate-950 text-xs text-white placeholder-slate-600 rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">Category</label>
-            <input
-              type="text"
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              placeholder="e.g. Software"
-              className="w-full bg-slate-950 text-xs text-white placeholder-slate-600 rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">Customer</label>
-            <input
-              type="text"
-              value={filterCustomer}
-              onChange={(e) => setFilterCustomer(e.target.value)}
-              placeholder="e.g. Acme Corp"
-              className="w-full bg-slate-950 text-xs text-white placeholder-slate-600 rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
-            />
-          </div>
+          {(!summary?.filter_metadata || summary.filter_metadata.date) && (
+            <>
+              <div>
+                <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">Start Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="w-full bg-slate-950 text-xs text-white rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">End Date</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="w-full bg-slate-950 text-xs text-white rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            </>
+          )}
+          {(!summary?.filter_metadata || summary.filter_metadata.product) && (
+            <div>
+              <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">
+                {summary?.filter_metadata?.product || "Product"}
+              </label>
+              <input
+                type="text"
+                value={filterProduct}
+                onChange={(e) => setFilterProduct(e.target.value)}
+                placeholder={`Search ${summary?.filter_metadata?.product || "Product"}...`}
+                className="w-full bg-slate-950 text-xs text-white placeholder-slate-600 rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          )}
+          {(!summary?.filter_metadata || summary.filter_metadata.region) && (
+            <div>
+              <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">
+                {summary?.filter_metadata?.region || "Region"}
+              </label>
+              <input
+                type="text"
+                value={filterRegion}
+                onChange={(e) => setFilterRegion(e.target.value)}
+                placeholder={`Search ${summary?.filter_metadata?.region || "Region"}...`}
+                className="w-full bg-slate-950 text-xs text-white placeholder-slate-600 rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          )}
+          {(!summary?.filter_metadata || summary.filter_metadata.category) && (
+            <div>
+              <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">
+                {summary?.filter_metadata?.category || "Category"}
+              </label>
+              <input
+                type="text"
+                value={filterCategory}
+                onChange={(e) => setFilterCategory(e.target.value)}
+                placeholder={`Search ${summary?.filter_metadata?.category || "Category"}...`}
+                className="w-full bg-slate-950 text-xs text-white placeholder-slate-600 rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          )}
+          {(!summary?.filter_metadata || summary.filter_metadata.customer) && (
+            <div>
+              <label className="block text-[10px] uppercase font-mono text-slate-400 mb-1">
+                {summary?.filter_metadata?.customer || "Customer"}
+              </label>
+              <input
+                type="text"
+                value={filterCustomer}
+                onChange={(e) => setFilterCustomer(e.target.value)}
+                placeholder={`Search ${summary?.filter_metadata?.customer || "Customer"}...`}
+                className="w-full bg-slate-950 text-xs text-white placeholder-slate-600 rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-slate-800/80">
@@ -304,96 +353,109 @@ export const DashboardPage: React.FC = () => {
       ) : (datasets.length === 0 || summary) ? (
         <div className="space-y-6">
           {/* Executive KPI Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <GlassCard>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase">Total Revenue</span>
-                <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400"><DollarSign className="w-4 h-4" /></div>
-              </div>
-              <h3 className="text-2xl font-black text-white">
-                {datasets.length === 0 ? "—" : `$${activeSummary.kpis.total_revenue.toLocaleString()}`}
-              </h3>
-              <div className="flex items-center gap-1.5 mt-2 text-xs">
-                {datasets.length === 0 ? (
-                  <span className="text-slate-500">No dataset uploaded</span>
-                ) : (
-                  <>
-                    <Badge variant="success"><ArrowUpRight className="w-3 h-3" /> +{activeSummary.kpis.revenue_growth_pct}%</Badge>
-                    <span className="text-slate-400">vs benchmark</span>
-                  </>
-                )}
-              </div>
-            </GlassCard>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            {datasets.length === 0 ? (
+              <GlassCard>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold text-slate-400 uppercase">Dataset Health</span>
+                  <div className="p-2 rounded-xl bg-slate-500/10 text-slate-400"><CheckCircle className="w-4 h-4" /></div>
+                </div>
+                <h3 className="text-2xl font-black text-white">—</h3>
+                <div className="text-xs text-slate-500 mt-2">No dataset uploaded</div>
+              </GlassCard>
+            ) : activeSummary?.kpis?.dynamic_kpis && activeSummary.kpis.dynamic_kpis.length > 0 ? (
+              activeSummary.kpis.dynamic_kpis.map((kpi) => (
+                <GlassCard key={kpi.key}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-slate-400 uppercase truncate pr-2" title={kpi.name}>
+                      {kpi.name}
+                    </span>
+                    <div className={`p-2 rounded-xl ${getKpiColorClass(kpi.key)}`}>
+                      {getKpiIcon(kpi.key)}
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-black text-white truncate" title={String(kpi.value)}>
+                    {typeof kpi.value === 'number' && !kpi.key.includes('pct') && !kpi.key.includes('rate') && !kpi.key.includes('margin') && !kpi.key.includes('gpa')
+                      ? (kpi.key.includes('revenue') || kpi.key.includes('profit') || kpi.key.includes('salary') ? `$${kpi.value.toLocaleString()}` : kpi.value.toLocaleString())
+                      : String(kpi.value)
+                    }
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-400">
+                    <span className="text-[10px] font-mono">Dynamic KPI Source</span>
+                  </div>
+                </GlassCard>
+              ))
+            ) : (
+              // Fallback to default KPI layout
+              <>
+                <GlassCard>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-slate-400 uppercase">Total Revenue</span>
+                    <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400"><DollarSign className="w-4 h-4" /></div>
+                  </div>
+                  <h3 className="text-2xl font-black text-white">
+                    {typeof activeSummary.kpis.total_revenue === 'number' ? `$${activeSummary.kpis.total_revenue.toLocaleString()}` : activeSummary.kpis.total_revenue}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-400">
+                    <span className="text-[10px] font-mono">Aggregate Sum</span>
+                  </div>
+                </GlassCard>
 
-            <GlassCard>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase">Gross Profit</span>
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400"><TrendingUp className="w-4 h-4" /></div>
-              </div>
-              <h3 className="text-2xl font-black text-white">
-                {datasets.length === 0 ? "—" : `$${activeSummary.kpis.total_profit.toLocaleString()}`}
-              </h3>
-              <div className="flex items-center gap-1.5 mt-2 text-xs">
-                {datasets.length === 0 ? (
-                  <span className="text-slate-500">No dataset uploaded</span>
-                ) : (
-                  <Badge variant="success"><ArrowUpRight className="w-3 h-3" /> {activeSummary.kpis.profit_margin}% margin</Badge>
-                )}
-              </div>
-            </GlassCard>
+                <GlassCard>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-slate-400 uppercase">Gross Profit</span>
+                    <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400"><TrendingUp className="w-4 h-4" /></div>
+                  </div>
+                  <h3 className="text-2xl font-black text-white">
+                    {typeof activeSummary.kpis.total_profit === 'number' ? `$${activeSummary.kpis.total_profit.toLocaleString()}` : activeSummary.kpis.total_profit}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-400">
+                    <span className="text-[10px] font-mono">Net Profit</span>
+                  </div>
+                </GlassCard>
 
-            <GlassCard>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase">Total Orders</span>
-                <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400"><ShoppingBag className="w-4 h-4" /></div>
-              </div>
-              <h3 className="text-2xl font-black text-white">
-                {datasets.length === 0 ? "—" : activeSummary.kpis.total_orders.toLocaleString()}
-              </h3>
-              <div className="flex items-center gap-1.5 mt-2 text-xs">
-                {datasets.length === 0 ? (
-                  <span className="text-slate-500">No dataset uploaded</span>
-                ) : (
-                  <Badge variant="success">AOV: ${activeSummary.kpis.avg_order_value}</Badge>
-                )}
-              </div>
-            </GlassCard>
+                <GlassCard>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-slate-400 uppercase">Total Orders</span>
+                    <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400"><ShoppingBag className="w-4 h-4" /></div>
+                  </div>
+                  <h3 className="text-2xl font-black text-white">
+                    {typeof activeSummary.kpis.total_orders === 'number' ? activeSummary.kpis.total_orders.toLocaleString() : activeSummary.kpis.total_orders}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-400">
+                    <span className="text-[10px] font-mono">Orders count</span>
+                  </div>
+                </GlassCard>
 
-            <GlassCard>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase">Active Customers</span>
-                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400"><Users className="w-4 h-4" /></div>
-              </div>
-              <h3 className="text-2xl font-black text-white">
-                {datasets.length === 0 ? "—" : activeSummary.kpis.active_customers.toLocaleString()}
-              </h3>
-              <div className="flex items-center gap-1.5 mt-2 text-xs">
-                {datasets.length === 0 ? (
-                  <span className="text-slate-500">No dataset uploaded</span>
-                ) : (
-                  <span className="text-slate-400">Unique entities</span>
-                )}
-              </div>
-            </GlassCard>
+                <GlassCard>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-slate-400 uppercase">Active Customers</span>
+                    <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400"><Users className="w-4 h-4" /></div>
+                  </div>
+                  <h3 className="text-2xl font-black text-white">
+                    {typeof activeSummary.kpis.active_customers === 'number' ? activeSummary.kpis.active_customers.toLocaleString() : activeSummary.kpis.active_customers}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-400">
+                    <span className="text-[10px] font-mono">Unique entities</span>
+                  </div>
+                </GlassCard>
 
-            <GlassCard>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-semibold text-slate-400 uppercase">Dataset Health</span>
-                <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400"><CheckCircle className="w-4 h-4" /></div>
-              </div>
-              <h3 className="text-2xl font-black text-white">
-                {datasets.length === 0 ? "—" : `${activeSummary.kpis.dataset_health_score}/100`}
-              </h3>
-              <div className="flex items-center gap-1.5 mt-2 text-xs">
-                {datasets.length === 0 ? (
-                  <span className="text-slate-500">No dataset uploaded</span>
-                ) : (
-                  <Badge variant={activeSummary.kpis.dataset_health_score > 80 ? 'success' : 'warning'}>
-                    {activeSummary.kpis.dataset_health_score > 80 ? 'Excellent' : 'Needs Clean'}
-                  </Badge>
-                )}
-              </div>
-            </GlassCard>
+                <GlassCard>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-semibold text-slate-400 uppercase">Dataset Health</span>
+                    <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400"><CheckCircle className="w-4 h-4" /></div>
+                  </div>
+                  <h3 className="text-2xl font-black text-white">
+                    {`${activeSummary.kpis.dataset_health_score}/100`}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-2 text-xs">
+                    <Badge variant={activeSummary.kpis.dataset_health_score > 80 ? 'success' : 'warning'}>
+                      {activeSummary.kpis.dataset_health_score > 80 ? 'Excellent' : 'Needs Clean'}
+                    </Badge>
+                  </div>
+                </GlassCard>
+              </>
+            )}
           </div>
 
           {/* Business Health Engine Analysis */}
