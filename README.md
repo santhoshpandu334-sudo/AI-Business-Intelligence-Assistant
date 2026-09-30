@@ -1,4 +1,4 @@
-# 🚀 AI Business Intelligence Assistant
+# Secure AI-Driven Business Intelligence Using RAG and LLMs with Role-Based Access Control
 
 <div align="center">
 
