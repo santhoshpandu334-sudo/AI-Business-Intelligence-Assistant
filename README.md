@@ -1,4 +1,4 @@
-# 🚀 AI Business Intelligence Assistant
+# 🚀 Secure AI-Driven Business Intelligence Using RAG and LLMs with Role-Based Access Control
 
 <div align="center">
 
@@ -21,7 +21,7 @@ Upload business data • Generate AI Insights • Forecast Revenue • Detect An
 
 # 📖 Overview
 
-**AI Business Intelligence Assistant** is a full-stack enterprise analytics platform that enables organizations to transform raw business data into actionable insights using Artificial Intelligence.
+**Secure AI-Driven Business Intelligence Using RAG and LLMs with Role-Based Access Control** is a full-stack enterprise analytics platform that enables organizations to transform raw business data into actionable insights using Artificial Intelligence.
 
 Instead of relying on traditional dashboards alone, the platform combines:
 
